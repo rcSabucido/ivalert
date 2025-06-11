@@ -1,5 +1,5 @@
 import React from 'react';
-import { Animated, Dimensions, PanResponder, StyleSheet, View } from 'react-native';
+import { Animated, Dimensions, PanResponder, StyleSheet, Text, View } from 'react-native';
 
 const { height } = Dimensions.get('window');
 const THRESHOLD = height * 0.4;
@@ -22,16 +22,24 @@ export default function Alert({ isVisible, onClose, children }: AlertProps) {
     }
   }, [isVisible]);
 
-  const panResponder = React.useRef(
+
+const panResponder = React.useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: () => true,
       onPanResponderMove: (_, gestureState) => {
-        if (gestureState.dy < 0) {
-          translateY.setValue(Math.abs(gestureState.dy));
-        }
+        translateY.setValue(gestureState.dy);
       },
       onPanResponderRelease: (_, gestureState) => {
-        if (gestureState.dy <  -THRESHOLD) {
+        if (gestureState.dy > 50) {
+          Animated.timing(translateY, {
+            toValue: height,
+            duration: 200,
+            useNativeDriver: true,
+          }).start(() => onClose());
+          return;
+        }
+        
+        if (gestureState.dy < -THRESHOLD) {
           Animated.spring(translateY, {
             toValue: height,
             useNativeDriver: true,
@@ -59,7 +67,9 @@ export default function Alert({ isVisible, onClose, children }: AlertProps) {
         ]}
         {...panResponder.panHandlers}
       >
-        {children}
+        <Text style={styles.alertText}>
+            Swipe up to dismiss this alert!
+        </Text>
       </Animated.View>
     </View>
   );
@@ -76,5 +86,9 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
+  },
+  alertText: {
+    fontSize: 20,
+    textAlign: 'center',
   },
 });

@@ -25,11 +25,7 @@ export default function Index() {
         </Text>
       </Pressable>
 
-      <Alert isVisible={showAlert} onClose={() => setShowAlert(false)}>
-        <Text style={{ fontSize: 20, textAlign: 'center' }}>
-          Swipe up to dismiss this alert!
-        </Text>
-      </Alert>
+      <Alert isVisible={showAlert} onClose={() => setShowAlert(false)}/>
     </View>
   );
 }
