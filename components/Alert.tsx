@@ -1,5 +1,6 @@
 import React from 'react';
 import { Animated, Dimensions, PanResponder, StyleSheet, Text, View } from 'react-native';
+import { ChevronDoubleUpIcon, ExclamationTriangleIcon } from 'react-native-heroicons/outline';
 
 const { height } = Dimensions.get('window');
 
@@ -61,10 +62,29 @@ const panResponder = React.useRef(
         ]}
         {...panResponder.panHandlers}
       >
-        <View>
-            <Text>
-                test
+        <View style={styles.headerContainer}>
+            <ExclamationTriangleIcon size={24} color="white" />
+            <Text style={styles.headerText}>
+                IV BAG LOW
             </Text>
+            <ExclamationTriangleIcon size={24} color="white" />
+        </View>
+
+        <View style={styles.messageContainer}>
+            <Text style={styles.messageText}>
+                Fluid level is below the safe threshold.
+            </Text>
+            <Text style={styles.messageText}>
+                Immediate attention required.
+            </Text>
+        </View>
+
+        <View style={styles.bigBoxOverlay}>
+        </View>
+
+        <View style={styles.footerContainer}>
+            <ChevronDoubleUpIcon size={24} color="white" />
+            <Text style={styles.footerText}>Swipe Up to Acknowledge</Text>
         </View>
       </Animated.View>
     </View>
@@ -76,17 +96,53 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
   },
-  container: {
+    container: {
+    flexDirection: 'column',
     flex: 1,
     backgroundColor: '#2AB4FD',
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
     padding: 20,
+    gap: 24,
   },
-  alertText: {
-    fontSize: 20,
-    fontFamily: 'Poppins_500Medium',
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    marginTop: '30%',
+  },
+  headerText: {
+    fontSize: 24,
+    fontFamily: 'Poppins_700Bold',
+    color: 'white',
     textAlign: 'center',
-    color: 'black'
+  },
+  messageContainer: {
+    alignItems: 'center',
+  },
+  messageText: {
+    fontSize: 16,
+    fontFamily: 'Poppins_400Regular',
+    color: 'white',
+    textAlign: 'center',
+  },
+  bigBoxOverlay: {
+    width: '80%',
+    height: 235,
+    backgroundColor: '#d2edfc',
+    alignSelf: 'center',
+    borderRadius: 12,
+  },
+  footerContainer: {
+    alignItems: 'center',
+    gap: 8,
+    marginTop: '45%'
+  },
+  footerText: {
+    fontSize: 14,
+    fontFamily: 'Poppins_500Medium',
+    color: 'white',
+    textAlign: 'center',
   },
 });
