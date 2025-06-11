@@ -19,6 +19,7 @@ export default function Index() {
           style={{
             color: "blue",
             marginTop: 20,
+            fontFamily: "Poppins_500Medium",
           }}
         >
           Press me!

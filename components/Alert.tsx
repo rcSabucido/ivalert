@@ -85,6 +85,7 @@ const styles = StyleSheet.create({
   },
   alertText: {
     fontSize: 20,
+    fontFamily: 'Poppins_500Medium',
     textAlign: 'center',
     color: 'black'
   },
