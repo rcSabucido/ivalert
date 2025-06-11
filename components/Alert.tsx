@@ -2,7 +2,6 @@ import React from 'react';
 import { Animated, Dimensions, PanResponder, StyleSheet, Text, View } from 'react-native';
 
 const { height } = Dimensions.get('window');
-const THRESHOLD = height * 0.4;
 
 type AlertProps = {
   isVisible: boolean;
@@ -79,7 +78,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: '#2AB4FD',
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
     padding: 20,
@@ -87,5 +86,6 @@ const styles = StyleSheet.create({
   alertText: {
     fontSize: 20,
     textAlign: 'center',
+    color: 'black'
   },
 });
