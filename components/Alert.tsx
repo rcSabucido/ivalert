@@ -1,3 +1,4 @@
+import { Image } from 'expo-image';
 import React from 'react';
 import { Animated, Dimensions, PanResponder, StyleSheet, Text, View } from 'react-native';
 import { ChevronDoubleUpIcon, ExclamationTriangleIcon } from 'react-native-heroicons/outline';
@@ -80,6 +81,11 @@ const panResponder = React.useRef(
         </View>
 
         <View style={styles.bigBoxOverlay}>
+          <Image
+            source={require('../assets/images/warning.gif')}
+            style={styles.warningGif}
+            contentFit="contain"
+          />
         </View>
 
         <View style={styles.footerContainer}>
@@ -133,6 +139,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#d2edfc',
     alignSelf: 'center',
     borderRadius: 12,
+  },
+  warningGif: {
+    width: '100%',
+    height: '100%',
   },
   footerContainer: {
     alignItems: 'center',
