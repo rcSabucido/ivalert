@@ -37,3 +37,12 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
+
+*.config
+*.cfg
+.env
+.env.local
+*.env
+*.env.local
+
+config.h
