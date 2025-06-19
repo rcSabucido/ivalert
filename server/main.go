@@ -10,12 +10,15 @@ import (
   "time"
   "flag"
   "bufio"
+  "math"
   "os"
   "strings"
+  "crypto/sha512"
 )
 
 var (
   config      map[string]string
+  level       float64
 )
 
 func loadConfig(path string) (map[string]string, error) {
@@ -47,20 +50,99 @@ func loadConfig(path string) (map[string]string, error) {
   return config, scanner.Err()
 }
 
+func wsHandler(w http.ResponseWriter, r *http.Request) {
+  authHeader := r.Header.Get("Authorization")
+
+  if authHeader == "" {
+    http.Error(w, "", http.StatusBadRequest)
+    return
+  }
+
+  password := strings.TrimPrefix(authHeader, "Bearer ")
+  passwordBytes := []byte(password)
+  passwordHash := sha512.Sum512(passwordBytes)
+  passwordHashHex := fmt.Sprintf("%x", passwordHash)
+  if passwordHashHex != config["POLL_PASSWORD_HASH"] {
+    fmt.Print("Invalid password from ", r.RemoteAddr)
+    fmt.Print(", passwordHashHex: ", passwordHashHex)
+    http.Error(w, "", http.StatusForbidden)
+    return
+  }
+
+  c, err := websocket.Accept(w, r, nil)
+  if err != nil {
+    fmt.Println("Error accepting WebSocket client:", err)
+    c.Close(websocket.StatusInvalidFramePayloadData, "")
+    return
+  }
+  defer c.CloseNow()
+
+  ctx := context.Background()
+
+  oldLevel := level
+  for {
+    for oldLevel == level {
+      time.Sleep(200 * time.Millisecond)
+    }
+
+    out := map[string]float64{ "new_level": math.Round(level * 1000) / 1000}
+
+    err = wsjson.Write(ctx, c, out)
+    oldLevel = level
+
+    if err != nil {
+      fmt.Println("Error writing level update:", err)
+      break
+    }
+  }
+
+  c.Close(websocket.StatusNormalClosure, "")
+}
+
 func updateHandler(w http.ResponseWriter, r *http.Request) {
   if r.Method != http.MethodPost {
     http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
     return
   }
 
-  var data map[string]string
+  authHeader := r.Header.Get("Authorization")
+
+  if authHeader == "" {
+    http.Error(w, "", http.StatusBadRequest)
+    return
+  }
+
+  var data map[string]interface{}
   err := json.NewDecoder(r.Body).Decode(&data)
   if err != nil {
     http.Error(w, "Invalid JSON", http.StatusBadRequest)
     return
   }
 
-  fmt.Println("received: %v", data)
+  if !strings.HasPrefix(authHeader, "Bearer ") {
+    http.Error(w, "", http.StatusForbidden)
+    return
+  }
+
+  password := strings.TrimPrefix(authHeader, "Bearer ")
+  passwordBytes := []byte(password)
+  passwordHash := sha512.Sum512(passwordBytes)
+  passwordHashHex := fmt.Sprintf("%x", passwordHash)
+  if passwordHashHex != config["PUSH_PASSWORD_HASH"] {
+    fmt.Print("Invalid password from ", r.RemoteAddr)
+    fmt.Println(", passwordHashHex:", passwordHashHex)
+    http.Error(w, "", http.StatusForbidden)
+    return
+  }
+
+  if data["new_level"] != "" {
+    newLevel, ok := data["new_level"].(float64)
+    if !ok {
+      http.Error(w, "", http.StatusBadRequest)
+      return
+    }
+    level = newLevel
+  }
 }
 
 func main() {
@@ -92,39 +174,29 @@ func main() {
     return
   }
 
+  if configRead["PUSH_PASSWORD_HASH"] == "" {
+    fmt.Println("ERROR: No push password hash in configuration.")
+    return
+  } else if configRead["POLL_PASSWORD_HASH"] == "" {
+    fmt.Println("ERROR: No poll password hash in configuration.")
+    return
+  } else if configRead["PORT"] == "" {
+    fmt.Println("ERROR: No port in configuration.")
+    return
+  }
+
   fmt.Println("Config file loaded!")
 
+  level = 0
   config = configRead
 
   http.HandleFunc("/", func (w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "Welcome to my website!")
+    http.Error(w, "", http.StatusNotFound)
+    return
   })
 
-  wsHandler := http.HandlerFunc(func (w http.ResponseWriter, r *http.Request) {
-    c, err := websocket.Accept(w, r, nil)
-    if err != nil {
-      fmt.Println("Error accepting WebSocket client:", err)
-      c.Close(websocket.StatusInvalidFramePayloadData, "")
-      return
-    }
-    defer c.CloseNow()
-
-    ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-    defer cancel()
-
-    var v interface{}
-    err = wsjson.Read(ctx, c, &v)
-    if err != nil {
-      fmt.Println("Error receiving WebSocket data:", err)
-      c.Close(websocket.StatusInvalidFramePayloadData, "")
-      return
-    }
-
-    fmt.Println("received: %v", v)
-
-    c.Close(websocket.StatusNormalClosure, "")
-  })
   http.HandleFunc("/live_update", wsHandler)
+  http.HandleFunc("/iv_post", updateHandler)
 
   fmt.Println("Listening in port %s...", configRead["PORT"])
   http.ListenAndServe(fmt.Sprintf(":%s", configRead["PORT"]), nil)
