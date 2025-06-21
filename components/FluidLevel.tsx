@@ -1,11 +1,11 @@
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { Image, StyleSheet, View } from "react-native";
 
 type Props = {
   level: number
 }
 
-const MAX_FLUID_LEVEL_HEIGHT = 260;
+const MAX_FLUID_LEVEL_HEIGHT = 300;
 const MARKER_SMALL = "20%";
 const MARKER_LENGTH = "25%";
 
@@ -14,6 +14,10 @@ export default function FluidLevel({ level } : Props) {
     <>
       <View style={styles.fluidBlock}>
         <View style={styles.fluidLevelBlock} />
+        <View style={styles.fluidLevelIconContainer}>
+          <Image source={require('@/assets/images/fluid-level-icon.png')} style={{
+            width: MAX_FLUID_LEVEL_HEIGHT * 0.4, height: MAX_FLUID_LEVEL_HEIGHT * 0.4}} />
+        </View>
         <View style={styles.fluidLevelMarkers}>
           <View style={styles.fluidLevelMarkerNone} />
           <View style={styles.fluidLevelMarker} />
@@ -26,6 +30,7 @@ export default function FluidLevel({ level } : Props) {
           <View style={styles.fluidLevelMarkerSmall} />
           <View style={styles.fluidLevelMarkerSmall} />
           <View style={styles.fluidLevelMarkerNone} />
+          <View style={styles.fluidLevelMarkerSmall} />
           <View style={styles.fluidLevelMarkerSmall} />
           <View style={styles.fluidLevelMarker} />
         </View>
@@ -74,11 +79,17 @@ const styles = StyleSheet.create({
     marginTop: 16,
     backgroundColor: "black",
   },
-
   fluidLevelMarkerNone: {
     width: MARKER_SMALL,
     height: 4,
     borderRadius: 2,
     marginTop: 16,
+  },
+  fluidLevelIconContainer: {
+    width: "100%",
+    height: "100%",
+    position: "absolute",
+    justifyContent: "center",
+    alignItems: "center",
   },
 })
