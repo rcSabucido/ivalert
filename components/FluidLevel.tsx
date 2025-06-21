@@ -5,7 +5,7 @@ type Props = {
   level: number
 }
 
-const MAX_FLUID_LEVEL_HEIGHT = 300;
+const MAX_FLUID_LEVEL_HEIGHT = 270;
 const MARKER_SMALL = "20%";
 const MARKER_LENGTH = "25%";
 
@@ -30,7 +30,6 @@ export default function FluidLevel({ level } : Props) {
           <View style={styles.fluidLevelMarkerSmall} />
           <View style={styles.fluidLevelMarkerSmall} />
           <View style={styles.fluidLevelMarkerNone} />
-          <View style={styles.fluidLevelMarkerSmall} />
           <View style={styles.fluidLevelMarkerSmall} />
           <View style={styles.fluidLevelMarker} />
         </View>

@@ -1,7 +1,7 @@
 import FluidLevel from "@/components/FluidLevel";
 import TrackingStatus from "@/components/TrackingStatus";
 import React, { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import Alert from "../components/Alert";
 
 export default function Index() {
@@ -11,14 +11,12 @@ export default function Index() {
     <View 
       style={{
         flex: 1,
-        justifyContent: "flex-start",
       }}>
-    <ScrollView>
       <View style={styles.headerBlock}>
         <Text style={styles.headerText}>WELCOME TO</Text>
         <Text style={styles.headerSubText}>IVALERT</Text>
       </View>
-      <View style={styles.block}>
+      <View style={[styles.block]}>
         <TrackingStatus />
       </View>
       <View style={styles.block}>
@@ -26,6 +24,7 @@ export default function Index() {
         <FluidLevel level={75} />
       </View>
 
+      {/*
       <Text>Edit app/index.tsx to edit this screen.</Text>
       <Pressable onPress={() => setShowAlert(true)}>
         <Text
@@ -38,9 +37,11 @@ export default function Index() {
           Press me!
         </Text>
       </Pressable>
+      <Text>Testing</Text>
+      <Text>Testing</Text>
+       */}
 
       <Alert isVisible={showAlert} onClose={() => setShowAlert(false)}/>
-    </ScrollView>
     </View>
   );
 }
@@ -71,6 +72,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderRadius: 24,
     alignItems: "center",
+    overflow: "hidden",
   },
   text: {
     fontFamily: "Poppins_700Bold",
