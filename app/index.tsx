@@ -1,6 +1,8 @@
+import FluidLevel from "@/components/FluidLevel";
 import React, { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import Alert from "../components/Alert";
+
 
 export default function Index() {
   const [showAlert, setShowAlert] = useState(false);
@@ -22,12 +24,11 @@ export default function Index() {
           <Text style={styles.trackingText}>75{"%"}</Text>
         </View>
         <Text style={styles.text}>Bag Volume: 1 Liter</Text>
+        <View style={styles.trackingGestureBar} />
       </View>
       <View style={styles.block}>
         <Text style={styles.text}>Fluid Level Monitor</Text>
-        <View style={styles.fluidBlock}>
-          <Text style={styles.trackingText}>75{"%"}</Text>
-        </View>
+        <FluidLevel level={75} />
       </View>
 
       <Text>Edit app/index.tsx to edit this screen.</Text>
@@ -68,7 +69,7 @@ const styles = StyleSheet.create({
   },
   block: {
     backgroundColor: "#BBDEFB",
-    padding: 10,
+    padding: 12,
     marginLeft: 24,
     marginRight: 24,
     marginTop: 16,
@@ -87,16 +88,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  fluidBlock: {
-    margin: 16,
-    borderColor: "black",
-    backgroundColor: "white",
-    borderWidth: 3,
-    borderRadius: 12,
-    height: 150,
-    width: "80%",
-    alignItems: "center",
-    justifyContent: "flex-end",
+  trackingGestureBar: {
+    width: "30%",
+    height: 4,
+    borderRadius: 2,
+    marginTop: 16,
+    backgroundColor: "#009DFF",
   },
   trackingText: {
     color: "#263268",
@@ -106,6 +103,7 @@ const styles = StyleSheet.create({
   text: {
     fontFamily: "Poppins_700Bold",
     fontSize: 20,
+    lineHeight: 24,
     color: "#263268",
   }
 })
