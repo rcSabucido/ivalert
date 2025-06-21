@@ -1,8 +1,8 @@
 import FluidLevel from "@/components/FluidLevel";
+import TrackingStatus from "@/components/TrackingStatus";
 import React, { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import Alert from "../components/Alert";
-
 
 export default function Index() {
   const [showAlert, setShowAlert] = useState(false);
@@ -19,12 +19,7 @@ export default function Index() {
         <Text style={styles.headerSubText}>IVALERT</Text>
       </View>
       <View style={styles.block}>
-        <Text style={styles.text}>Tracking Status</Text>
-        <View style={styles.trackingBlock}>
-          <Text style={styles.trackingText}>75{"%"}</Text>
-        </View>
-        <Text style={styles.text}>Bag Volume: 1 Liter</Text>
-        <View style={styles.trackingGestureBar} />
+        <TrackingStatus />
       </View>
       <View style={styles.block}>
         <Text style={styles.text}>Fluid Level Monitor</Text>
@@ -76,29 +71,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderRadius: 24,
     alignItems: "center",
-  },
-  trackingBlock: {
-    margin: 16,
-    borderColor: "black",
-    backgroundColor: "white",
-    borderWidth: 3,
-    borderRadius: 12,
-    height: 150,
-    width: 140,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  trackingGestureBar: {
-    width: "30%",
-    height: 4,
-    borderRadius: 2,
-    marginTop: 16,
-    backgroundColor: "#009DFF",
-  },
-  trackingText: {
-    color: "#263268",
-    fontFamily: "Poppins_700Bold",
-    fontSize: 40,
   },
   text: {
     fontFamily: "Poppins_700Bold",
