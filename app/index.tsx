@@ -23,24 +23,6 @@ export default function Index() {
         <Text style={styles.text}>Fluid Level Monitor</Text>
         <FluidLevel level={75} />
       </View>
-
-      {/*
-      <Text>Edit app/index.tsx to edit this screen.</Text>
-      <Pressable onPress={() => setShowAlert(true)}>
-        <Text
-          style={{
-            color: "blue",
-            marginTop: 20,
-            fontFamily: "Poppins_500Medium",
-          }}
-        >
-          Press me!
-        </Text>
-      </Pressable>
-      <Text>Testing</Text>
-      <Text>Testing</Text>
-       */}
-
       <Alert isVisible={showAlert} onClose={() => setShowAlert(false)}/>
     </View>
   );
