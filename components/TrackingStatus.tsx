@@ -1,31 +1,63 @@
+import { useAudioPlayer } from 'expo-audio';
 import React, { useEffect, useRef, useState } from "react";
-import { Animated, Dimensions, PanResponder, Pressable, StyleSheet, Text, View } from "react-native";
+import { Animated, Dimensions, PanResponder, Pressable, StyleSheet, Text, Vibration, View } from "react-native";
 import { WebSocketService } from '../services/WebSocketService';
 
 const { width } = Dimensions.get('window');
 const wsService = new WebSocketService();
+const alarmToneSound = require('@/assets/audio/alarm_tone.wav');
 
 type TrackingStatusProps = {
-  showAlert: boolean
+  showAlert: boolean,
+  setShowAlert: (arg0: boolean) => void,
+  setFluidLevel: (arg0: number) => void,
 };
 
-export default function TrackingStatus({ showAlert }: TrackingStatusProps) {
+export default function TrackingStatus({ showAlert, setShowAlert, setFluidLevel }: TrackingStatusProps) {
   const componentRef = useRef(null);
   const translateX = useRef<Animated.Value>(new Animated.Value(0)).current;
   const [isTracking, setIsTracking] = useState(false);
-  const [currentLevel, setCurrentLevel] = useState(0);  
+  const [currentLevel, setCurrentLevel] = useState(0); 
+  const [trackingButtonVisible, setTrackingButtonVisible] = useState(false);
+
+  const playerAlarmSound = useAudioPlayer(alarmToneSound);
+
+  const playAlarmSound = () => {
+      playerAlarmSound.seekTo(0);
+      playerAlarmSound.play();
+      console.log("Playing alarm...")
+  }
 
   const startTracking = () => {
+    if (isTracking) {
+      return
+    }
     wsService.connect('ws://nephil.net:4295/live_update', (level) => {
-      let roundLevel = Math.floor(level);
+      let roundLevel = Math.round(level);
       setCurrentLevel(roundLevel);
-      onLevelUpdate(roundLevel);
+      setFluidLevel(roundLevel);
       console.log("Received level update:", roundLevel);
+      if (roundLevel < 10) {
+        setShowAlert(true);
+        setIsTracking(false);
+        Vibration.vibrate(1000);
+        playAlarmSound();
+        wsService.disconnect();
+
+        Animated.spring(translateX, {
+          toValue: -width,
+          useNativeDriver: true,
+        }).start();
+        setTrackingButtonVisible(true);
+      }
     });
     setIsTracking(true);
   };
 
   const stopTracking = () => {
+    if (!isTracking) {
+      return
+    }
     wsService.disconnect();
     setIsTracking(false);
   };
@@ -38,7 +70,7 @@ export default function TrackingStatus({ showAlert }: TrackingStatusProps) {
     return () => {
       wsService.disconnect();
     };
-  }, []);
+  }, [wsService]);
   
   const panResponder = React.useRef<any>(
     PanResponder.create({
@@ -55,8 +87,7 @@ export default function TrackingStatus({ showAlert }: TrackingStatusProps) {
             duration: 200,
             useNativeDriver: true,
           }).start(() => {
-            setTrackingButtonVisible(false);
-            console.log("closed")
+            setTrackingButtonVisible(true);
           });
           return;
         }
@@ -69,9 +100,9 @@ export default function TrackingStatus({ showAlert }: TrackingStatusProps) {
     })
   ).current;
   
-  console.log(translateX);
-
-  console.log(`tracking button visible: ${trackingButtonVisible}`)
+  useEffect(() => {
+    console.log("trackingButtonVisible changed:", trackingButtonVisible);
+  }, [trackingButtonVisible]);
 
   return (
     <>
@@ -79,7 +110,6 @@ export default function TrackingStatus({ showAlert }: TrackingStatusProps) {
       <View style={[styles.trackingNav, { backgroundColor: trackingButtonVisible ? "white" : "#263268" }]}/>
       <View style={[styles.trackingNav, { backgroundColor: !trackingButtonVisible ? "white" : "#263268" }]}/>
     </View>
-    { trackingButtonVisible && <View></View> }
     <View style={{ height: "28%" }}>
       <Text style={[styles.text, {paddingTop: 40}]}>Tracking: Inactive</Text>
 
@@ -89,14 +119,14 @@ export default function TrackingStatus({ showAlert }: TrackingStatusProps) {
           toValue: 0,
           useNativeDriver: true,
         }).start();
-        setTrackingButtonVisible(true);
+        setTrackingButtonVisible(false);
       }}>
         <Text style={[styles.text, { color: "white" }]}>{isTracking ? 'Stop Tracking' : 'Start Tracking'}</Text>
       </Pressable>
       
-      { trackingButtonVisible && <Animated.View style={[styles.internalBlock,
+      { <Animated.View style={[styles.internalBlock,
         { transform: [{ translateX: translateX }]}]} {...panResponder.panHandlers}>
-        <Text style={styles.text}>Tracking Status</Text>
+        <Text style={styles.text}>{isTracking ? "Tracking Status" : "Stopped Tracking"}</Text>
         <View style={styles.trackingBlock}>
           <Text style={styles.trackingText}>{currentLevel}%</Text>
         </View>

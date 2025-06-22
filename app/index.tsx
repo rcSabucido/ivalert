@@ -5,14 +5,9 @@ import { StyleSheet, Text, View } from "react-native";
 import Alert from "../components/Alert";
 
 export default function Index() {
-  const [trackingButtonVisible, setTrackingButtonVisible] = useState(true);
   const [showAlert, setShowAlert] = useState(false);
   const [currentLevel, setCurrentLevel] = useState(0);
-
-  const handleLevelUpdate = (level: number) => {
-    setCurrentLevel(level);
-  }
-
+ 
   return (
     <View 
       style={{
@@ -23,7 +18,7 @@ export default function Index() {
         <Text style={styles.headerSubText}>IVALERT</Text>
       </View>
       <View style={[styles.block]}>
-        <TrackingStatus onLevelUpdate={handleLevelUpdate}/>
+        <TrackingStatus showAlert={showAlert} setShowAlert={setShowAlert} setFluidLevel={setCurrentLevel}/>
       </View>
       <View style={styles.block}>
         <Text style={styles.text}>Fluid Level Monitor</Text>
