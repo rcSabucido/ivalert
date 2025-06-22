@@ -5,6 +5,7 @@ import { StyleSheet, Text, View } from "react-native";
 import Alert from "../components/Alert";
 
 export default function Index() {
+  const [trackingButtonVisible, setTrackingButtonVisible] = useState(true);
   const [showAlert, setShowAlert] = useState(false);
   const [currentLevel, setCurrentLevel] = useState(0);
 

@@ -51,24 +51,6 @@ func loadConfig(path string) (map[string]string, error) {
 }
 
 func wsHandler(w http.ResponseWriter, r *http.Request) {
-  authHeader := r.Header.Get("Authorization")
-
-  if authHeader == "" {
-    http.Error(w, "", http.StatusBadRequest)
-    return
-  }
-
-  password := strings.TrimPrefix(authHeader, "Bearer ")
-  passwordBytes := []byte(password)
-  passwordHash := sha512.Sum512(passwordBytes)
-  passwordHashHex := fmt.Sprintf("%x", passwordHash)
-  if passwordHashHex != config["POLL_PASSWORD_HASH"] {
-    fmt.Print("Invalid password from ", r.RemoteAddr)
-    fmt.Print(", passwordHashHex: ", passwordHashHex)
-    http.Error(w, "", http.StatusForbidden)
-    return
-  }
-
   c, err := websocket.Accept(w, r, nil)
   if err != nil {
     fmt.Println("Error accepting WebSocket client:", err)
@@ -77,7 +59,36 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
   }
   defer c.CloseNow()
 
-  ctx := context.Background()
+  ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+  defer cancel()
+
+  var v map[string]string
+  err = wsjson.Read(ctx, c, &v)
+  if err != nil {
+    fmt.Println("Error authenticating WebSocket client:", err)
+    c.Close(websocket.StatusInvalidFramePayloadData, "")
+    return
+  }
+  if (v["password"] == "") {
+    fmt.Println("WebSocket client has no password:", err)
+    c.Close(websocket.StatusInvalidFramePayloadData, "")
+    return
+  }
+
+  password := v["password"]
+  passwordBytes := []byte(password)
+  passwordHash := sha512.Sum512(passwordBytes)
+  passwordHashHex := fmt.Sprintf("%x", passwordHash)
+  if passwordHashHex != config["POLL_PASSWORD_HASH"] {
+    fmt.Print("Invalid password from ", r.RemoteAddr)
+    fmt.Print(", passwordHashHex: ", passwordHashHex)
+    err = wsjson.Write(ctx, c, map[string]string {"error": "Invalid credentials"} )
+    time.Sleep(100 * time.Millisecond)
+    c.Close(websocket.StatusInvalidFramePayloadData, "")
+    return
+  }
+
+  ctx = context.Background()
 
   oldLevel := level
   for {
@@ -140,6 +151,9 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
     if !ok {
       http.Error(w, "", http.StatusBadRequest)
       return
+    }
+    if (newLevel != level) {
+      fmt.Println("New level:", level, "%")
     }
     level = newLevel
   }
