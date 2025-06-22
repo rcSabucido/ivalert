@@ -91,6 +91,16 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
   ctx = context.Background()
 
   oldLevel := level
+
+
+  out := map[string]float64{ "new_level": math.Round(level * 1000) / 1000}
+  err = wsjson.Write(ctx, c, out)
+  if err != nil {
+    fmt.Println("Error writing initial level update:", err)
+    c.Close(websocket.StatusNormalClosure, "")
+    return
+  }
+
   for {
     for oldLevel == level {
       time.Sleep(200 * time.Millisecond)
