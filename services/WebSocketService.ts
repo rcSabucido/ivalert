@@ -3,18 +3,25 @@ export class WebSocketService {
     private reconnectAttempts = 0;
     private readonly maxReconnectAttempts = 5;
     private readonly reconnectDelay = 2000; // 2 secs
+   
 
     connect(serverUrl: string, onLevelUpdate: (level: number) => void) {
         if (this.ws) {
             this.ws.close();
         }
 
-        const wsUrl = `${serverUrl.replace(/^http/, 'ws')}/live_update`;
+        const POLL_PASSWORD =  process.env.EXPO_PUBLIC_POLL_PASSWORD;
+        const wsUrl = serverUrl;
 
         this.ws = new WebSocket(wsUrl);
 
         this.ws.onopen = () => {
             console.log('Websocket connected');
+            if (this.ws && POLL_PASSWORD) {
+                this.ws.send(JSON.stringify({ 
+                    password: POLL_PASSWORD,
+                }));
+            }
             this.reconnectAttempts = 0; 
         };
 

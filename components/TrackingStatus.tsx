@@ -1,17 +1,37 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Animated, Dimensions, PanResponder, Pressable, StyleSheet, Text, View } from "react-native";
+import { WebSocketService } from '../services/WebSocketService';
 
 const { height } = Dimensions.get('window');
+const wsService = new WebSocketService();
 
 export default function TrackingStatus() {
   const componentRef = useRef(null);
   const translateY = useRef<Animated.Value>(new Animated.Value(0)).current;
+  const [isTracking, setIsTracking] = useState(false);
+  const [currentLevel, setCurrentLevel] = useState(0);  
+
+  const startTracking = () => {
+    wsService.connect('ws://nephil.net:4295/live_update', (level) => {
+      setCurrentLevel(level);
+      console.log("Received level update:", level);
+    });
+    setIsTracking(true);
+  };
+
+  const stopTracking = () => {
+    wsService.disconnect();
+    setIsTracking(false);
+  };
 
   useEffect(() => {
     Animated.spring(translateY, {
       toValue: 0,
       useNativeDriver: true,
     }).start();
+    return () => {
+      wsService.disconnect();
+    };
   }, []);
 
   const panResponder = React.useRef<any>(
@@ -49,19 +69,20 @@ export default function TrackingStatus() {
       <Text style={[styles.text, {paddingTop: 40}]}>Tracking: Inactive</Text>
 
       <Pressable style={styles.trackButton} onPress={() => {
+        isTracking ? stopTracking() : startTracking();
         Animated.spring(translateY, {
           toValue: 0,
           useNativeDriver: true,
         }).start();
       }}>
-        <Text style={[styles.text, { color: "white" }]}>Start Tracking</Text>
+        <Text style={[styles.text, { color: "white" }]}>{isTracking ? 'Stop Tracking' : 'Start Tracking'}</Text>
       </Pressable>
       
       <Animated.View style={[styles.internalBlock,
         { transform: [{ translateY: translateY }]}]} {...panResponder.panHandlers}>
         <Text style={styles.text}>Tracking Status</Text>
         <View style={styles.trackingBlock}>
-          <Text style={styles.trackingText}>75{"%"}</Text>
+          <Text style={styles.trackingText}>{currentLevel}%</Text>
         </View>
         <Text style={styles.text}>Bag Volume: 1 Liter</Text>
         <View style={styles.trackingGestureBar}/>
