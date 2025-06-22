@@ -176,7 +176,7 @@ func main() {
 
   if configRead["PUSH_PASSWORD_HASH"] == "" {
     fmt.Println("ERROR: No push password hash in configuration.")
-    return
+    return// indirect
   } else if configRead["POLL_PASSWORD_HASH"] == "" {
     fmt.Println("ERROR: No poll password hash in configuration.")
     return

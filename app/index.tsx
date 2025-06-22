@@ -6,6 +6,11 @@ import Alert from "../components/Alert";
 
 export default function Index() {
   const [showAlert, setShowAlert] = useState(false);
+  const [currentLevel, setCurrentLevel] = useState(0);
+
+  const handleLevelUpdate = (level: number) => {
+    setCurrentLevel(level);
+  }
 
   return (
     <View 
@@ -17,30 +22,12 @@ export default function Index() {
         <Text style={styles.headerSubText}>IVALERT</Text>
       </View>
       <View style={[styles.block]}>
-        <TrackingStatus />
+        <TrackingStatus onLevelUpdate={handleLevelUpdate}/>
       </View>
       <View style={styles.block}>
         <Text style={styles.text}>Fluid Level Monitor</Text>
-        <FluidLevel level={75} />
+        <FluidLevel level={currentLevel} />
       </View>
-
-      {/*
-      <Text>Edit app/index.tsx to edit this screen.</Text>
-      <Pressable onPress={() => setShowAlert(true)}>
-        <Text
-          style={{
-            color: "blue",
-            marginTop: 20,
-            fontFamily: "Poppins_500Medium",
-          }}
-        >
-          Press me!
-        </Text>
-      </Pressable>
-      <Text>Testing</Text>
-      <Text>Testing</Text>
-       */}
-
       <Alert isVisible={showAlert} onClose={() => setShowAlert(false)}/>
     </View>
   );

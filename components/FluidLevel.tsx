@@ -10,10 +10,12 @@ const MARKER_SMALL = "20%";
 const MARKER_LENGTH = "25%";
 
 export default function FluidLevel({ level } : Props) {
+  const normalizedLevel = Math.max(0, Math.min(100, level));
+  const fluidHeight = Math.round(MAX_FLUID_LEVEL_HEIGHT * (normalizedLevel / 100));
   return (
     <>
       <View style={styles.fluidBlock}>
-        <View style={styles.fluidLevelBlock} />
+        <View style={[styles.fluidLevelBlock, {height: fluidHeight }]} />
         <View style={styles.fluidLevelIconContainer}>
           <Image source={require('@/assets/images/fluid-level-icon.png')} style={{
             width: MAX_FLUID_LEVEL_HEIGHT * 0.4, height: MAX_FLUID_LEVEL_HEIGHT * 0.4}} />
