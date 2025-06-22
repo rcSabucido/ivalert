@@ -1,11 +1,11 @@
 import React from "react";
-import { Image, StyleSheet, View } from "react-native";
+import { Dimensions, Image, StyleSheet, View } from "react-native";
 
 type Props = {
   level: number
 }
 
-const MAX_FLUID_LEVEL_HEIGHT = 270;
+const MAX_FLUID_LEVEL_HEIGHT = Dimensions.get("window").height * 0.3;
 const MARKER_SMALL = "20%";
 const MARKER_LENGTH = "25%";
 
@@ -13,7 +13,7 @@ export default function FluidLevel({ level } : Props) {
   return (
     <>
       <View style={styles.fluidBlock}>
-        <View style={styles.fluidLevelBlock} />
+        <View style={[styles.fluidLevelBlock, { height: Math.round(MAX_FLUID_LEVEL_HEIGHT * level / 100) }]} />
         <View style={styles.fluidLevelIconContainer}>
           <Image source={require('@/assets/images/fluid-level-icon.png')} style={{
             width: MAX_FLUID_LEVEL_HEIGHT * 0.4, height: MAX_FLUID_LEVEL_HEIGHT * 0.4}} />
@@ -39,7 +39,6 @@ export default function FluidLevel({ level } : Props) {
 }
 
 const styles = StyleSheet.create({
-
   fluidBlock: {
     margin: 16,
     borderColor: "black",
@@ -53,7 +52,6 @@ const styles = StyleSheet.create({
   },
   fluidLevelBlock: {
     borderRadius: 16,
-    height: Math.round(MAX_FLUID_LEVEL_HEIGHT * 0.75),
     width: "100%",
     backgroundColor: "#009DFF",
     position: "absolute",

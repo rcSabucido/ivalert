@@ -1,40 +1,54 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Animated, Dimensions, PanResponder, Pressable, StyleSheet, Text, View } from "react-native";
 
-const { height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
-export default function TrackingStatus() {
-  const componentRef = useRef(null);
-  const translateY = useRef<Animated.Value>(new Animated.Value(0)).current;
+type Props = {
+  showAlert: boolean
+}
+
+export default function TrackingStatus({ showAlert }: Props) {
+  const [trackingButtonVisible, setTrackingButtonVisible] = useState(true);
+  const translateX = useRef<Animated.Value>(new Animated.Value(-width)).current;
 
   useEffect(() => {
-    Animated.spring(translateY, {
-      toValue: 0,
-      useNativeDriver: true,
-    }).start();
-  }, []);
+    if (trackingButtonVisible || showAlert) {
+      Animated.spring(translateX, {
+        toValue: 0,
+        useNativeDriver: true,
+      }).start();
+      setTrackingButtonVisible(true);
+    } else {
+      Animated.spring(translateX, {
+        toValue: -width,
+        useNativeDriver: true,
+      }).start();
+    }
+    console.log("useEffect!")
+  }, [trackingButtonVisible, showAlert]);
 
   const panResponder = React.useRef<any>(
     PanResponder.create({
       onMoveShouldSetPanResponder: () => true,
       onPanResponderMove: (_, gestureState) => {
-        if (gestureState.dy <= 0) {
-          translateY.setValue(gestureState.dy);
+        if (gestureState.dx <= 0) {
+          translateX.setValue(gestureState.dx);
         }
       },
       onPanResponderRelease: (_, gestureState) => {
-        if (gestureState.dy < -50) {
-          Animated.timing(translateY, {
-            toValue: -height, 
+        if (gestureState.dx < -50) {
+          Animated.timing(translateX, {
+            toValue: -width, 
             duration: 200,
             useNativeDriver: true,
           }).start(() => {
+            setTrackingButtonVisible(false);
             console.log("closed")
           });
           return;
         }
 
-        Animated.spring(translateY, {
+        Animated.spring(translateX, {
           toValue: 0,
           useNativeDriver: true,
         }).start();
@@ -42,31 +56,40 @@ export default function TrackingStatus() {
     })
   ).current;
   
-  console.log(translateY);
+  console.log(translateX);
+
+  console.log(`tracking button visible: ${trackingButtonVisible}`)
 
   return (
-    <View style={{ height: 260 }}>
+    <>
+    <View style={{flexDirection: "row"}}>
+      <View style={[styles.trackingNav, { backgroundColor: trackingButtonVisible ? "white" : "#263268" }]}/>
+      <View style={[styles.trackingNav, { backgroundColor: !trackingButtonVisible ? "white" : "#263268" }]}/>
+    </View>
+    { trackingButtonVisible && <View></View> }
+    <View style={{ height: "28%" }}>
       <Text style={[styles.text, {paddingTop: 40}]}>Tracking: Inactive</Text>
 
       <Pressable style={styles.trackButton} onPress={() => {
-        Animated.spring(translateY, {
+        Animated.spring(translateX, {
           toValue: 0,
           useNativeDriver: true,
         }).start();
+        setTrackingButtonVisible(true);
       }}>
         <Text style={[styles.text, { color: "white" }]}>Start Tracking</Text>
       </Pressable>
       
-      <Animated.View style={[styles.internalBlock,
-        { transform: [{ translateY: translateY }]}]} {...panResponder.panHandlers}>
+      { trackingButtonVisible && <Animated.View style={[styles.internalBlock,
+        { transform: [{ translateX: translateX }]}]} {...panResponder.panHandlers}>
         <Text style={styles.text}>Tracking Status</Text>
         <View style={styles.trackingBlock}>
           <Text style={styles.trackingText}>75{"%"}</Text>
         </View>
         <Text style={styles.text}>Bag Volume: 1 Liter</Text>
-        <View style={styles.trackingGestureBar}/>
-      </Animated.View>
+      </Animated.View> }
     </View>
+    </>
   );
 }
 
@@ -83,14 +106,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  trackingGestureBar: {
-    width: "35%",
-    height: 24,
+  trackingNav: {
+    width: 32,
+    height: 32,
     borderColor: "#BBDEFB",
     borderWidth: 10,
     borderRadius: 16,
     marginTop: 4,
-    backgroundColor: "#009DFF",
+    backgroundColor: "#263268",
   },
   trackingText: {
     color: "#263268",
