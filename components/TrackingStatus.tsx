@@ -5,7 +5,11 @@ import { WebSocketService } from '../services/WebSocketService';
 const { height } = Dimensions.get('window');
 const wsService = new WebSocketService();
 
-export default function TrackingStatus() {
+type TrackingStatusProps = {
+  onLevelUpdate: (level: number) => void;
+};
+
+export default function TrackingStatus({ onLevelUpdate }: TrackingStatusProps) {
   const componentRef = useRef(null);
   const translateY = useRef<Animated.Value>(new Animated.Value(0)).current;
   const [isTracking, setIsTracking] = useState(false);
@@ -13,8 +17,10 @@ export default function TrackingStatus() {
 
   const startTracking = () => {
     wsService.connect('ws://nephil.net:4295/live_update', (level) => {
-      setCurrentLevel(level);
-      console.log("Received level update:", level);
+      let roundLevel = Math.floor(level);
+      setCurrentLevel(roundLevel);
+      onLevelUpdate(roundLevel);
+      console.log("Received level update:", roundLevel);
     });
     setIsTracking(true);
   };
