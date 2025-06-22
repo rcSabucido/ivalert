@@ -1,32 +1,45 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Animated, Dimensions, PanResponder, Pressable, StyleSheet, Text, View } from "react-native";
+import { WebSocketService } from '../services/WebSocketService';
 
 const { width } = Dimensions.get('window');
+const wsService = new WebSocketService();
 
-type Props = {
+type TrackingStatusProps = {
   showAlert: boolean
-}
+};
 
-export default function TrackingStatus({ showAlert }: Props) {
-  const [trackingButtonVisible, setTrackingButtonVisible] = useState(true);
-  const translateX = useRef<Animated.Value>(new Animated.Value(-width)).current;
+export default function TrackingStatus({ showAlert }: TrackingStatusProps) {
+  const componentRef = useRef(null);
+  const translateX = useRef<Animated.Value>(new Animated.Value(0)).current;
+  const [isTracking, setIsTracking] = useState(false);
+  const [currentLevel, setCurrentLevel] = useState(0);  
+
+  const startTracking = () => {
+    wsService.connect('ws://nephil.net:4295/live_update', (level) => {
+      let roundLevel = Math.floor(level);
+      setCurrentLevel(roundLevel);
+      onLevelUpdate(roundLevel);
+      console.log("Received level update:", roundLevel);
+    });
+    setIsTracking(true);
+  };
+
+  const stopTracking = () => {
+    wsService.disconnect();
+    setIsTracking(false);
+  };
 
   useEffect(() => {
-    if (trackingButtonVisible || showAlert) {
-      Animated.spring(translateX, {
-        toValue: 0,
-        useNativeDriver: true,
-      }).start();
-      setTrackingButtonVisible(true);
-    } else {
-      Animated.spring(translateX, {
-        toValue: -width,
-        useNativeDriver: true,
-      }).start();
-    }
-    console.log("useEffect!")
-  }, [trackingButtonVisible, showAlert]);
-
+    Animated.spring(translateX, {
+      toValue: 0,
+      useNativeDriver: true,
+    }).start();
+    return () => {
+      wsService.disconnect();
+    };
+  }, []);
+  
   const panResponder = React.useRef<any>(
     PanResponder.create({
       onMoveShouldSetPanResponder: () => true,
@@ -71,20 +84,21 @@ export default function TrackingStatus({ showAlert }: Props) {
       <Text style={[styles.text, {paddingTop: 40}]}>Tracking: Inactive</Text>
 
       <Pressable style={styles.trackButton} onPress={() => {
+        isTracking ? stopTracking() : startTracking();
         Animated.spring(translateX, {
           toValue: 0,
           useNativeDriver: true,
         }).start();
         setTrackingButtonVisible(true);
       }}>
-        <Text style={[styles.text, { color: "white" }]}>Start Tracking</Text>
+        <Text style={[styles.text, { color: "white" }]}>{isTracking ? 'Stop Tracking' : 'Start Tracking'}</Text>
       </Pressable>
       
       { trackingButtonVisible && <Animated.View style={[styles.internalBlock,
         { transform: [{ translateX: translateX }]}]} {...panResponder.panHandlers}>
         <Text style={styles.text}>Tracking Status</Text>
         <View style={styles.trackingBlock}>
-          <Text style={styles.trackingText}>75{"%"}</Text>
+          <Text style={styles.trackingText}>{currentLevel}%</Text>
         </View>
         <Text style={styles.text}>Bag Volume: 1 Liter</Text>
       </Animated.View> }
