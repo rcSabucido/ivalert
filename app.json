@@ -4,7 +4,7 @@
     "slug": "ivalert",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/iv-icon.png",
     "scheme": "ivalert",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -29,10 +29,9 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/iv-splash-icon.png",
           "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#009DFF"
         }
       ],
       "expo-font",
