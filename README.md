@@ -1,5 +1,9 @@
 # IVAlert
 
+<p align="center">
+    <img src="./assets/images/iv-logo-readme.png" width=20%>
+</p>
+
 IVAlert is a real-time IV (Intravenous) fluid monitoring system consisting of mobile, server, and embedded components. The system tracks fluid levels in IV bags and alerts healthcare providers when levels are critically low.
 
 ## Components
